@@ -92,36 +92,35 @@ class Rollcall(View):
         return serialize_data(absent)
 
 
-#class Professor_schedule(View):
+class Professor_schedule(View):
 
+    def get(self, request, *args, **kwargs):
+        first_name = request.GET.get("firstName")
+        last_name = request.GET.get("lastName")
 
-def professor_schedule(request):
-    first_name = request.GET.get("firstName")
-    last_name = request.GET.get("lastName")
+        if not Professor.objects.filter(firstName=first_name, lastName=last_name).exists():
+            error_message = {
+                "error": "There is no professor with such a name"
+            }
+            return JsonResponse(error_message)
 
-    if not Professor.objects.filter(firstName=first_name, lastName=last_name).exists():
-        error_message = {
-            "error": "There is no professor with such a name"
+        professor = Professor.objects.get(firstName=first_name, lastName=last_name)
+        professor_No = professor.personnelCode
+        schedual = Course.objects.filter(profNo=professor_No) \
+            .values('course_subject', 'courseschedule__course_day', 'courseschedule__course_time')
+
+        result = []
+        for course in schedual:
+            Name = course['course_subject']
+            Day = course['courseschedule__course_day']
+            Time = str(course['courseschedule__course_time'])
+
+            result.append({'Name': Name, 'Day': Day, 'Time': Time})
+
+        result_dictionary = {
+            "data": result
         }
-        return JsonResponse(error_message)
-
-    professor = Professor.objects.get(firstName=first_name, lastName=last_name)
-    professor_No = professor.personnelCode
-    schedual = Course.objects.filter(profNo=professor_No) \
-        .values('course_subject', 'courseschedule__course_day', 'courseschedule__course_time')
-
-    result = []
-    for course in schedual:
-        Name = course['course_subject']
-        Day = course['courseschedule__course_day']
-        Time = str(course['courseschedule__course_time'])
-
-        result.append({'Name': Name, 'Day': Day, 'Time': Time})
-
-    result_dictionary = {
-        "data": result
-    }
-    return HttpResponse(json.dumps(result_dictionary), content_type="application/json")
+        return HttpResponse(json.dumps(result_dictionary), content_type="application/json")
 
 
 

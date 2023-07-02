@@ -7,5 +7,5 @@ urlpatterns = [
     path('report_card', views.Report_card.as_view()),
     path('courseInfo', views.Courses_info.as_view()),
     path('rollcall', views.Rollcall.as_view()),
-    path('professorschedule',views.professor_schedule),
+    path('professorschedule',views.Professor_schedule.as_view()),
 ]
