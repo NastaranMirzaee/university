@@ -21,8 +21,17 @@ def course_schedule(request):
 
     result = []
     for x in courses:
-        result.append(x)
-    print(result)
+        course_group = x['course__course_group']
+        course_subject = x['course__course_subject']
+        course_day = x['course__courseschedule__course_day']
+        course_time = str(x['course__courseschedule__course_time'])
+        course_classNo = x['course__classNo']
+        course_prof_firstName = x['course__profNo__firstName']
+        course_prof_lastName = x['course__profNo__lastName']
+        result.append({'course_group': course_group, 'course_subject': course_subject, 'course_day': course_day,
+                       'course_time': course_time, 'course_classNo': course_classNo,
+                       'course_prof_firstName' : course_prof_firstName, 'course_prof_lastName': course_prof_lastName})
+
     re = {
         "data": result
     }
