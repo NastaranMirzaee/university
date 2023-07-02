@@ -9,6 +9,24 @@ from django.http import HttpResponse, JsonResponse
 from .models import *
 
 
+def course_schedule(request):
+    courses = TakeCourses.objects.filter(studentNo=request.GET.get("studentNo")) \
+                .values(
+                         'course__course_group', 'course__course_subject',
+                         'course__classNo', 'course__profNo__firstName',
+                         'course__profNo__lastName', 'course__courseschedule__course_day',
+                         'course__courseschedule__course_time'
+                        )
+
+
+    result = []
+    for x in courses:
+        result.append(x)
+    print(result)
+    re = {
+        "data": result
+    }
+    return HttpResponse(json.dumps(re), content_type="application/json")
 
 
 def report_card(request):
