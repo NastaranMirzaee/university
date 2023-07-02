@@ -1,5 +1,5 @@
 import json
-
+from django.views import View
 from django.db.models import Count
 from django.shortcuts import render
 from django.core import serializers
@@ -8,22 +8,43 @@ from django.http import HttpResponse, JsonResponse
 
 from .models import *
 
-def entrance_field_student(request):
-    students = Student.objects.filter(entranceYear=request.GET.get("entranceYear"), deptNo__field=request.GET.get("field"))\
-                        .values(
-                                    'studentNo', 'firstName', 'lastName', 'email', 'phoneNumber',
-                                    'supervisor__firstName', 'supervisor__lastName', 'gpa'
-                                )
+def take_course(request):
+    student = Student.objects.get(studentNo=request.GET.get("studentNo"))
+    course_code1 = request.GET.get("course_code1")
+    course_group1 = request.GET.get("course_group1")
+    course_subject1 = request.GET.get("course_subject1")
 
+def serialize_data(datas):
     result = []
-    for x in students:
-        result.append(x)
-    print(result)
-    re = {
+    for data in datas:
+        result.append(data)
+    result_dictionary = {
         "data": result
     }
-    return HttpResponse(json.dumps(re), content_type="application/json")
+    return HttpResponse(json.dumps(result_dictionary), content_type="application/json")
 
+class EntranceFieldStudent(View):
+
+    @staticmethod
+    def get(request, *args, **kwargs):
+        entranceYear = request.GET.get("entranceYear")
+        field = request.GET.get("field")
+        if not Student.objects.filter(entranceYear=entranceYear).exists() or \
+                not Student.objects.filter(deptNo__field=field).exists():
+            error_message = {
+
+                "error": "Invalid input"
+            }
+            return JsonResponse(error_message)
+
+        students = Student.objects.filter(entranceYear=request.GET.get("entranceYear"),
+                                          deptNo__field=request.GET.get("field")) \
+            .values(
+            'studentNo', 'firstName', 'lastName', 'email', 'phoneNumber',
+            'supervisor__firstName', 'supervisor__lastName', 'gpa'
+        )
+
+        return serialize_data(students)
 
 
 def course_schedule(request):
