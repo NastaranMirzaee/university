@@ -14,12 +14,13 @@ def reserve_food(request):
                                            )
     new_food_reservation.save()
 
-    food_reservations = Food.objects.values('students__studentNo', 'food_name', 'foodreservation__food_reservation_date')
+    food_reservations = FoodReservation.objects.values('studentNo__studentNo', 'food_id__food_name',
+                                                       'food_reservation_date')
     result = []
     for x in food_reservations:
-        studentNo = x['students__studentNo']
-        food = x['food_name']
-        date = str(x['foodreservation__food_reservation_date'])
+        studentNo = x['studentNo__studentNo']
+        food = x['food_id__food_name']
+        date = str(x['food_reservation_date'])
         result.append({'studentNo': studentNo, 'food': food, 'date': date})
 
     print(result)
@@ -34,13 +35,13 @@ def delete_food(request):
     date = request.GET.get("date")
     FoodReservation.objects.get(studentNo=student, food_id=food_id, food_reservation_date=date).delete()
 
-    food_reservations = Food.objects.values('students__studentNo', 'food_name',
-                                            'foodreservation__food_reservation_date')
+    food_reservations = FoodReservation.objects.values('studentNo__studentNo', 'food_id__food_name',
+                                                       'food_reservation_date')
     result = []
     for x in food_reservations:
-        studentNo = x['students__studentNo']
-        food = x['food_name']
-        date = str(x['foodreservation__food_reservation_date'])
+        studentNo = x['studentNo__studentNo']
+        food = x['food_id__food_name']
+        date = str(x['food_reservation_date'])
         result.append({'studentNo': studentNo, 'food': food, 'date': date})
 
     print(result)
