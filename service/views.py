@@ -7,17 +7,18 @@ from .models import *
 
 class ReserveFood(View):
 
-    @staticmethod
-    def post(request, *args, **kwargs):
-        student_no = request.GET.get("studentNo")
-        food = request.GET.get("food")
+    def put(self, request, *args, **kwargs):
+
+        body = json.loads(request.body)
+        student_no = body['studentNo']
+        food = body['food']
 
         student = Student.objects.get(studentNo=student_no)
         food_id = Food.objects.get(food_name=food)
         new_food_reservation = FoodReservation(
                                                 studentNo=student,
                                                 food_id=food_id,
-                                                food_reservation_date=request.GET.get("date")
+                                                food_reservation_date=body['date']
                                                )
         new_food_reservation.save()
 
@@ -37,8 +38,7 @@ class ReserveFood(View):
 
 class DeleteFood(View):
 
-    @staticmethod
-    def delete(request, *args, **kwargs):
+    def delete(self, request, *args, **kwargs):
         student_no = request.GET.get("studentNo")
         food = request.GET.get("food")
         date = request.GET.get("date")
