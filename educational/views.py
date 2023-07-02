@@ -72,23 +72,24 @@ class Courses_info(View):
         return serialize_data(coursesinfo)
 
 
-def rollcall(request):
-    student_no = request.GET.get("studentNo")
+class Rollcall(View):
 
-    if not Student.objects.filter(studentNo=student_no).exists():
-        error_message = {
+    def get(self, request, *args, **kwargs):
+        student_no = request.GET.get("studentNo")
+        if not Student.objects.filter(studentNo=student_no).exists():
+            error_message = {
 
-            "error": "Invalid student number"
-        }
-        return JsonResponse(error_message)
+                "error": "Invalid student number"
+            }
+            return JsonResponse(error_message)
 
-    absent = RollCall.objects \
-        .filter(studentNo=student_no, isPresent=0) \
-        .values('session__course') \
-        .annotate(count=Count('session__course')).values('session__course', 'session__course__course_subject',
-                                                         'count', )
+        absent = RollCall.objects \
+            .filter(studentNo=student_no, isPresent=0) \
+            .values('session__course') \
+            .annotate(count=Count('session__course'))\
+            .values('session__course', 'session__course__course_subject','count',)
 
-    return serialize_data(absent)
+        return serialize_data(absent)
 
 
 def professor_schedule(request):
