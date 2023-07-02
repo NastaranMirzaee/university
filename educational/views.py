@@ -92,6 +92,9 @@ class Rollcall(View):
         return serialize_data(absent)
 
 
+#class Professor_schedule(View):
+
+
 def professor_schedule(request):
     first_name = request.GET.get("firstName")
     last_name = request.GET.get("lastName")
@@ -102,7 +105,8 @@ def professor_schedule(request):
         }
         return JsonResponse(error_message)
 
-    professor_No = Professor.objects.filter(firstName=first_name, lastName=last_name).values('personnelCode')
+    professor = Professor.objects.get(firstName=first_name, lastName=last_name)
+    professor_No = professor.personnelCode
     schedual = Course.objects.filter(profNo=professor_No) \
         .values('course_subject', 'courseschedule__course_day', 'courseschedule__course_time')
 
@@ -120,17 +124,5 @@ def professor_schedule(request):
     return HttpResponse(json.dumps(result_dictionary), content_type="application/json")
 
 
-def exam_schedule(request):
-    a = TakeCourses.objects \
-        .filter(studentNo=request.GET.get("studentNo")) \
-        .values('course', 'course__course_subject')
 
-    result = []
-    for x in a:
-        result.append(x)
-    print(result)
-    re = {
-        "data": result
-    }
 
-    return HttpResponse(json.dumps(re), content_type="application/json")
