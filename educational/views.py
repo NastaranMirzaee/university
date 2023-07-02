@@ -9,8 +9,7 @@ from django.http import HttpResponse, JsonResponse
 from .models import *
 
 def entrance_field_student(request):
-    students = Student.objects.filter(entranceYear=request.GET.get("entranceYear"))\
-                        .filter(deptNo__field=request.GET.get("field"))\
+    students = Student.objects.filter(entranceYear=request.GET.get("entranceYear"), deptNo__field=request.GET.get("field"))\
                         .values(
                                     'studentNo', 'firstName', 'lastName', 'email', 'phoneNumber',
                                     'supervisor__firstName', 'supervisor__lastName', 'gpa'
@@ -24,6 +23,7 @@ def entrance_field_student(request):
         "data": result
     }
     return HttpResponse(json.dumps(re), content_type="application/json")
+
 
 
 def course_schedule(request):
