@@ -5,7 +5,7 @@ from . import views
 
 urlpatterns = [
     path('report_card', views.Report_card.as_view()),
-    path('rollcall/', views.rollcall),
-    path('courseInfo/', views.courses_info),
-    path('professorschedule/',views.professor_schedule),
+    path('courseInfo', views.Courses_info.as_view()),
+    path('rollcall', views.rollcall),
+    path('professorschedule',views.professor_schedule),
 ]

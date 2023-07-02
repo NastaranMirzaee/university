@@ -2,10 +2,9 @@ import json
 from django.db.models import Count
 from django.http import HttpResponse, JsonResponse
 from django.views import View
-
 from .models import *
-
 from django.db.models import F
+
 
 def serialize_data(datas):
     result = []
@@ -17,7 +16,12 @@ def serialize_data(datas):
     return HttpResponse(json.dumps(result_dictionary), content_type="application/json")
 
 
+def response(message):
+    return HttpResponse(json.dumps(message), content_type="application/json")
+
+
 class Report_card(View):
+
     def get(self, request, *args, **kwargs):
         # Code for GET method
         student_no = request.GET.get("studentNo")
@@ -31,10 +35,10 @@ class Report_card(View):
         takecourses = TakeCourses.objects.filter(studentNo=student_no) \
             .filter(course__is_digital_signature=1) \
             .annotate(
-            grade=F('student_grade'),
             lastName=F('course__profNo__lastName'),
             firstName=F('course__profNo__firstName'),
-            subject=F('course__course_subject')
+            subject=F('course__course_subject'),
+            grade=F('student_grade'),
         ).values(
             'course',
             'lastName',
@@ -45,10 +49,27 @@ class Report_card(View):
         return serialize_data(takecourses)
 
 
-def courses_info(request):
-    coursesinfo = Course.objects \
-        .values('course_code', 'course_subject', 'profNo__firstName', 'profNo__lastName', 'classNo', 'deptNo')
-    return serialize_data(coursesinfo)
+class Courses_info(View):
+
+    def get(self, request, *args, **kwargs):
+        coursesinfo = Course.objects \
+            .annotate(
+            course=F('course_code'),
+            subject=F('course_subject'),
+            lastName=F('profNo__lastName'),
+            firstName=F('profNo__firstName'),
+            department=F('deptNo__faculty'),
+            classNumber=F('classNo')
+
+        ).values(
+            'course',
+            'subject',
+            'lastName',
+            'firstName',
+            'classNo',
+            'deptNo'
+        )
+        return serialize_data(coursesinfo)
 
 
 def rollcall(request):
