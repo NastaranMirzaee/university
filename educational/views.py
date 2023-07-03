@@ -32,7 +32,7 @@ class PassedCourses(View):
 
     def get(self, request, *args, **kwargs):
         studentNo = request.GET.get("studentNo")
-        passed_courses = TakeCourses.objects.filter(studentNo=studentNo, student_grade__gte=10)\
+        passed_courses = TakeCourses.objects.filter(studentNo=studentNo, student_grade__gte=10, course__is_digital_signature=True)\
             .values('course__course_subject')
 
         return serialize_data(passed_courses)
