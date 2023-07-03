@@ -28,6 +28,18 @@ def str_to_date(date_string):
     except ValueError:
         return None
 
+class PassedCourses(View):
+
+    def get(self, request, *args, **kwargs):
+        studentNo = request.GET.get("studentNo")
+        passed_courses = TakeCourses.objects.filter(studentNo=studentNo, student_grade__gte=10)\
+            .values('course__course_subject')
+
+        return serialize_data(passed_courses)
+
+
+
+
 class DeleteSingleCourse(View):
 
     def delete(self, request, *args, **kwargs):
@@ -149,7 +161,6 @@ class TakeCourse(View):
             .values('studentNo__studentNo', 'course__course_subject')
 
         return serialize_data(This_term_lessons)
-
 
 
 
