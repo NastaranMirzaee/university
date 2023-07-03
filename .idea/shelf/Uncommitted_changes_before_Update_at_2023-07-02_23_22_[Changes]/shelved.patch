@@ -1,0 +1,126 @@
+Index: educational/views.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import json\r\n\r\nfrom django.db.models import Count\r\nfrom django.shortcuts import render\r\nfrom django.core import serializers\r\nfrom .models import *\r\nfrom django.http import HttpResponse, JsonResponse\r\n\r\nfrom .models import *\r\n\r\n\r\n\r\n\r\ndef report_card(request):\r\n    # absent = RollCall.objects\\\r\n    #         .filter(studentNo=request.GET.get(\"studentNo\"))\\\r\n    #         .filter(isPresent=0).values('session__course')\\\r\n    #         .annotate(count=Count('session__course')).values('session__course__course_subject', 'count')\r\n    takecourses = TakeCourses.objects.filter(studentNo=request.GET.get(\"studentNo\"))\\\r\n                  .filter(course__is_digital_signature=1)\\\r\n                  .values(\r\n                        'course', 'course__course_subject', 'course__profNo__firstName',\r\n                        'course__profNo__lastName', 'student_grade'\r\n                        )\r\n\r\n    result = []\r\n    for x in takecourses:\r\n        result.append(x)\r\n    print(result)\r\n    re = {\r\n        \"data\": result\r\n    }\r\n    return HttpResponse(json.dumps(re), content_type=\"application/json\")\r\n\r\n\r\ndef rollcall(request):\r\n    absent = RollCall.objects\\\r\n            .filter(studentNo=request.GET.get(\"studentNo\"))\\\r\n            .filter(isPresent=0).values('session__course')\\\r\n            .annotate(count=Count('session__course')).values('session__course__course_subject', 'count')\r\n\r\n    result = []\r\n    for x in absent:\r\n        result.append(x)\r\n    print(result)\r\n    re = {\r\n        \"data\": result\r\n    }\r\n    return HttpResponse(json.dumps(re), content_type=\"application/json\")\r\n\r\n\r\ndef courses_info(request):\r\n    coursesinfo = Course.objects\\\r\n                  .values('course_code', 'course_subject', 'profNo__firstName', 'profNo__lastName', 'classNo', 'deptNo')\r\n    result = []\r\n    for x in coursesinfo:\r\n        result.append(x)\r\n    print(result)\r\n    re = {\r\n        \"data\": result\r\n    }\r\n\r\n    return HttpResponse(json.dumps(re), content_type=\"application/json\")\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/educational/views.py b/educational/views.py
+--- a/educational/views.py	(revision 97d21708a5b10893faf9528f862a3a4abc0716fd)
++++ b/educational/views.py	(date 1688326108964)
+@@ -61,3 +61,34 @@
+     }
+ 
+     return HttpResponse(json.dumps(re), content_type="application/json")
++
++
++def averege_of_professor(request):
++    average = Professor.objects\
++                  .values('personnelCode', 'firstName', 'lastName').annotate(
++                  average_grade=models.Avg('profNo__course__student_grade'))
++
++    result = []
++    for x in average:
++        result.append(x)
++    print(result)
++    re = {
++        "data": result
++    }
++
++    return HttpResponse(json.dumps(re), content_type="application/json")
++
++def student_leisure_registration(request):
++    average = Professor.objects\
++                  .values('firstName', 'lastName', 'service_sport__SportName').annotate(name=models.F('service_sport__SportName')).filter(service_registerleisureclass__studentNo_id=models.F('studentNo'),
++                                                                                                                                          service_registerleisureclass__leisure_class_id=models.F('service_sport__sport_id'))
++
++    result = []
++    for x in average:
++        result.append(x)
++    print(result)
++    re = {
++        "data": result
++    }
++
++    return HttpResponse(json.dumps(re), content_type="application/json")
+\ No newline at end of file
+Index: .idea/misc.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<project version=\"4\">\r\n  <component name=\"ProjectRootManager\" version=\"2\" project-jdk-name=\"Python 3.9 (DBProject) (2)\" project-jdk-type=\"Python SDK\" />\r\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/misc.xml b/.idea/misc.xml
+--- a/.idea/misc.xml	(revision 97d21708a5b10893faf9528f862a3a4abc0716fd)
++++ b/.idea/misc.xml	(date 1688307271863)
+@@ -1,4 +1,4 @@
+ <?xml version="1.0" encoding="UTF-8"?>
+ <project version="4">
+-  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.9 (DBProject) (2)" project-jdk-type="Python SDK" />
++  <component name="ProjectRootManager" version="2" project-jdk-name="Python 3.11 (university)" project-jdk-type="Python SDK" />
+ </project>
+\ No newline at end of file
+Index: educational/urls.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from django.urls import path\r\n\r\nfrom . import views\r\n\r\nurlpatterns = [\r\n\r\n    path('report_card/', views.report_card),\r\n    path('rollcall/', views.rollcall),\r\n    path('courseInfo/', views.courses_info),\r\n]
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/educational/urls.py b/educational/urls.py
+--- a/educational/urls.py	(revision 97d21708a5b10893faf9528f862a3a4abc0716fd)
++++ b/educational/urls.py	(date 1688324558844)
+@@ -7,4 +7,5 @@
+     path('report_card/', views.report_card),
+     path('rollcall/', views.rollcall),
+     path('courseInfo/', views.courses_info),
++    path('averege_of_professor/', views.averege_of_professor),
+ ]
+\ No newline at end of file
+Index: DBProject/urls.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>\"\"\"\r\nURL configuration for DBProject project.\r\n\r\nThe `urlpatterns` list routes URLs to views. For more information please see:\r\n    https://docs.djangoproject.com/en/4.2/topics/http/urls/\r\nExamples:\r\nFunction views\r\n    1. Add an import:  from my_app import views\r\n    2. Add a URL to urlpatterns:  path('', views.home, name='home')\r\nClass-based views\r\n    1. Add an import:  from other_app.views import Home\r\n    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')\r\nIncluding another URLconf\r\n    1. Import the include() function: from django.urls import include, path\r\n    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))\r\n\"\"\"\r\nfrom django.contrib import admin\r\nfrom django.urls import path\r\n\r\nurlpatterns = [\r\n    path('admin/', admin.site.urls),\r\n]\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/DBProject/urls.py b/DBProject/urls.py
+--- a/DBProject/urls.py	(revision 97d21708a5b10893faf9528f862a3a4abc0716fd)
++++ b/DBProject/urls.py	(date 1688314135330)
+@@ -15,8 +15,10 @@
+     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+ """
+ from django.contrib import admin
+-from django.urls import path
++from django.urls import path, include
+ 
+ urlpatterns = [
+     path('admin/', admin.site.urls),
+-]
++    path('educational/', include("educational.urls")),
++   # path('service/', include("service.urls"))
++]
+\ No newline at end of file
+Index: .idea/DBProject.iml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n<module type=\"PYTHON_MODULE\" version=\"4\">\r\n  <component name=\"FacetManager\">\r\n    <facet type=\"django\" name=\"Django\">\r\n      <configuration>\r\n        <option name=\"rootFolder\" value=\"$MODULE_DIR$\" />\r\n        <option name=\"settingsModule\" value=\"DBProject/settings.py\" />\r\n        <option name=\"manageScript\" value=\"$MODULE_DIR$/manage.py\" />\r\n        <option name=\"environment\" value=\"&lt;map/&gt;\" />\r\n        <option name=\"doNotUseTestRunner\" value=\"false\" />\r\n        <option name=\"trackFilePattern\" value=\"migrations\" />\r\n      </configuration>\r\n    </facet>\r\n  </component>\r\n  <component name=\"NewModuleRootManager\">\r\n    <content url=\"file://$MODULE_DIR$\">\r\n      <excludeFolder url=\"file://$MODULE_DIR$/venv\" />\r\n    </content>\r\n    <orderEntry type=\"inheritedJdk\" />\r\n    <orderEntry type=\"sourceFolder\" forTests=\"false\" />\r\n  </component>\r\n  <component name=\"TemplatesService\">\r\n    <option name=\"TEMPLATE_CONFIGURATION\" value=\"Django\" />\r\n    <option name=\"TEMPLATE_FOLDERS\">\r\n      <list>\r\n        <option value=\"$MODULE_DIR$/../DBProject\\templates\" />\r\n      </list>\r\n    </option>\r\n  </component>\r\n</module>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/DBProject.iml b/.idea/DBProject.iml
+--- a/.idea/DBProject.iml	(revision 97d21708a5b10893faf9528f862a3a4abc0716fd)
++++ b/.idea/DBProject.iml	(date 1688307271844)
+@@ -14,9 +14,10 @@
+   </component>
+   <component name="NewModuleRootManager">
+     <content url="file://$MODULE_DIR$">
++      <excludeFolder url="file://$MODULE_DIR$/university" />
+       <excludeFolder url="file://$MODULE_DIR$/venv" />
+     </content>
+-    <orderEntry type="inheritedJdk" />
++    <orderEntry type="jdk" jdkName="Python 3.11 (university)" jdkType="Python SDK" />
+     <orderEntry type="sourceFolder" forTests="false" />
+   </component>
+   <component name="TemplatesService">
