@@ -1,4 +1,6 @@
 import json
+from datetime import datetime
+
 from django.views import View
 from django.db.models import Count
 from django.shortcuts import render
@@ -17,15 +19,26 @@ def serialize_data(datas):
     }
     return HttpResponse(json.dumps(result_dictionary), content_type="application/json")
 
+def str_to_date(date_string):
+    date_format = '%Y-%m-%d'
+
+    try:
+        date_obj = datetime.strptime(date_string, date_format).date()
+        return date_obj
+    except ValueError:
+        return None
+
 
 class TakeCourse(View):
 
     def put(self, request, *args, **kwargs):
-        student = Student.objects.get(studentNo=request.GET.get("studentNo"))
-        date = request.GET.get("date")
-        course_code1 = request.GET.get("course_code1")
-        course_group1 = request.GET.get("course_group1")
-        course_subject1 = request.GET.get("course_subject1")
+        body = json.loads(request.body)
+        studentNo = body['studentNo']
+        student = Student.objects.get(studentNo=studentNo)
+        date = str_to_date(body['date'])
+        course_code1 = body['course_code1']
+        course_group1 = body['course_group1']
+        course_subject1 = body['course_subject1']
         this_term = Term.objects.last()
         start_selection_unit_date = this_term.selection_unit_start_date
         end_selection_unit_date = this_term.selection_unit_end_date
@@ -38,7 +51,7 @@ class TakeCourse(View):
 
         if course_code1 is not None and course_group1 is not None and\
             course_subject1 is not None:
-                course = Course.objects.get(course_code1)
+                course = Course.objects.get(course_code=course_code1)
                 new_lesson = TakeCourses(
                                             student_grade=None,
                                             professor_grade=None,
@@ -47,7 +60,10 @@ class TakeCourse(View):
                                         )
                 new_lesson.save()
 
+        This_term_lessons = TakeCourses.objects.filter(studentNo__studentNo=studentNo, course__term=this_term)\
+            .values('studentNo__studentNo', 'course__course_subject')
 
+        return serialize_data(This_term_lessons)
 
 class EntranceFieldStudent(View):
 
