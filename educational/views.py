@@ -28,17 +28,16 @@ def str_to_date(date_string):
     except ValueError:
         return None
 
+class DeleteCourseUnitSelection(View):
 
-class TakeCourse(View):
-
-    def put(self, request, *args, **kwargs):
+    def delete(self, request, *args, **kwargs):
         body = json.loads(request.body)
         studentNo = body['studentNo']
-        student = Student.objects.get(studentNo=studentNo)
+
         date = str_to_date(body['date'])
-        course_code1 = body['course_code1']
-        course_group1 = body['course_group1']
-        course_subject1 = body['course_subject1']
+        course_code = body['course_code']
+        course_subject = body['course_subject']
+
         this_term = Term.objects.last()
         start_selection_unit_date = this_term.selection_unit_start_date
         end_selection_unit_date = this_term.selection_unit_end_date
@@ -49,9 +48,50 @@ class TakeCourse(View):
             }
             return JsonResponse(error_message)
 
-        if course_code1 is not None and course_group1 is not None and\
-            course_subject1 is not None:
-                course = Course.objects.get(course_code=course_code1)
+        if TakeCourses.objects.filter(
+                                        studentNo__studentNo=studentNo,
+                                        course__course_code=course_code,
+                                        course__course_subject=course_subject
+                                      ).exists():
+
+            TakeCourses.objects.get(
+                                        studentNo__studentNo=studentNo,
+                                        course__course_code=course_code,
+                                        course__course_subject=course_subject
+                                    ).delete()
+
+        This_term_lessons = TakeCourses.objects.filter(studentNo__studentNo=studentNo, course__term=this_term) \
+            .values('studentNo__studentNo', 'course__course_subject')
+
+        return serialize_data(This_term_lessons)
+
+class TakeCourse(View):
+
+    def put(self, request, *args, **kwargs):
+        body = json.loads(request.body)
+        studentNo = body['studentNo']
+        student = Student.objects.get(studentNo=studentNo)
+        date = str_to_date(body['date'])
+
+        course_code = body['course_code1']
+        course_subject = body['course_subject1']
+
+        this_term = Term.objects.last()
+        start_selection_unit_date = this_term.selection_unit_start_date
+        end_selection_unit_date = this_term.selection_unit_end_date
+        if not (start_selection_unit_date < date < end_selection_unit_date):
+            error_message = {
+
+                "error": "You can't take courses today"
+            }
+            return JsonResponse(error_message)
+
+        if course_code is not None and course_subject is not None\
+                and not TakeCourses.objects.filter(
+                                                        studentNo__studentNo=studentNo,
+                                                        course__course_code=course_code
+                                                    ).exists():
+                course = Course.objects.get(course_code=course_code)
                 new_lesson = TakeCourses(
                                             student_grade=None,
                                             professor_grade=None,
@@ -60,10 +100,14 @@ class TakeCourse(View):
                                         )
                 new_lesson.save()
 
+
         This_term_lessons = TakeCourses.objects.filter(studentNo__studentNo=studentNo, course__term=this_term)\
             .values('studentNo__studentNo', 'course__course_subject')
 
         return serialize_data(This_term_lessons)
+
+
+
 
 class EntranceFieldStudent(View):
 
