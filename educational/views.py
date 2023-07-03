@@ -125,3 +125,13 @@ class Professor_schedule(View):
 
 
 
+class PersonInfo(View):
+    def put(self, request, *args, **kwargs):
+        body = json.loads(request.body)
+        student_no = body['student_no']
+        record = Student.objects.get(studentNo=student_no)
+        record.firstName = body['firstName']
+        record.save()
+        return response({"status": "succes"})
+
+
