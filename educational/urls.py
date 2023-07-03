@@ -8,5 +8,6 @@ urlpatterns = [
     path('EntranceFieldStudent', views.EntranceFieldStudent.as_view()),
     path('TakeCourse', views.TakeCourse.as_view()),
     path('DeleteCourseUnitSelection', views.DeleteCourseUnitSelection.as_view()),
+    path('DeleteSingleCourse', views.DeleteCourseUnitSelection.as_view()),
 
 ]

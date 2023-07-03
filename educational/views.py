@@ -28,6 +28,50 @@ def str_to_date(date_string):
     except ValueError:
         return None
 
+class DeleteSingleCourse(View):
+
+    def delete(self, request, *args, **kwargs):
+        body = json.loads(request.body)
+        studentNo = body['studentNo']
+
+        date = str_to_date(body['date'])
+        course_code = body['course_code']
+        course_subject = body['course_subject']
+
+        this_term = Term.objects.last()
+        end_selection_unit_date = this_term.selection_unit_end_date
+        delete_lesson_end_date = this_term.delete_lesson_end_date
+        # print("end_selection_unit_date",end_selection_unit_date)
+        # print("date",date)
+        # print("delete_lesson_end_date",delete_lesson_end_date)
+
+        if not (end_selection_unit_date < date < delete_lesson_end_date):
+            error_message = {
+
+                "error": "You can't delete your course today",
+
+            }
+            return JsonResponse(error_message)
+
+        if TakeCourses.objects.filter(
+                                        studentNo__studentNo=studentNo,
+                                        course__course_code=course_code,
+                                        course__course_subject=course_subject
+                                      ).exists():
+
+            TakeCourses.objects.get(
+                                        studentNo__studentNo=studentNo,
+                                        course__course_code=course_code,
+                                        course__course_subject=course_subject
+                                    ).delete()
+
+        This_term_lessons = TakeCourses.objects.filter(studentNo__studentNo=studentNo, course__term=this_term) \
+            .values('studentNo__studentNo', 'course__course_subject')
+
+        return serialize_data(This_term_lessons)
+
+
+
 class DeleteCourseUnitSelection(View):
 
     def delete(self, request, *args, **kwargs):
@@ -44,7 +88,7 @@ class DeleteCourseUnitSelection(View):
         if not (start_selection_unit_date < date < end_selection_unit_date):
             error_message = {
 
-                "error": "You can't take courses today"
+                "error": "You can't take course today"
             }
             return JsonResponse(error_message)
 
