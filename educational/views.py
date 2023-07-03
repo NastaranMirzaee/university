@@ -3,7 +3,7 @@ from django.db.models import Count
 from django.http import HttpResponse, JsonResponse
 from django.views import View
 from .models import *
-from django.db.models import F
+from django.db.models import *
 
 
 def serialize_data(datas):
@@ -184,4 +184,6 @@ class Alef_student(View):
         students = Student.objects\
             .filter(entranceYear=entranceYear,gpa__gt=17).values('firstName','lastName','studentNo','gpa')
         return serialize_data(students)
+
+
 
