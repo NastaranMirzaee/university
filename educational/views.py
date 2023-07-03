@@ -38,6 +38,16 @@ class PassedCourses(View):
         return serialize_data(passed_courses)
 
 
+class TermPlan(View):
+
+    def get(self, request, *args, **kwargs):
+        studentNo = request.GET.get("studentNo")
+        this_term = Term.objects.last()
+        plan = Course.objects.filter(takecourses__studentNo__studentNo=studentNo, term=this_term)\
+            .values('course_code', 'course_subject', 'classNo', 'profNo__firstName', 'profNo__lastName', 'deptNo__faculty')
+
+
+        return serialize_data(plan)
 
 
 class DeleteSingleCourse(View):
