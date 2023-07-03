@@ -130,11 +130,10 @@ class PersonInfo(View):
         record = None
         if Student.objects.filter(studentNo=personId).exists():
             record = Student.objects.get(studentNo=personId)
-            print(record)
+
 
         elif Professor.objects.filter(personnelCode=personId).exists():
             record = Professor.objects.get(personnelCode=personId)
-            print(record)
 
         if record is not None:
             if body['First Name'] is not None:
@@ -175,4 +174,14 @@ class PersonInfo(View):
         # record.save()
         # return response({"status": "succes"})
 
+
+
+class Alef_student(View):
+
+    def get(self, request, *args, **kwargs):
+
+        entranceYear=request.GET.get("entranceYear")
+        students = Student.objects\
+            .filter(entranceYear=entranceYear,gpa__gt=17).values('firstName','lastName','studentNo','gpa')
+        return serialize_data(students)
 
