@@ -19,8 +19,6 @@ def serialize_data(datas):
 def response(message):
     return HttpResponse(json.dumps(message), content_type="application/json")
 
-#def error_message()
-
 
 class Report_card(View):
 
@@ -139,21 +137,33 @@ class PersonInfo(View):
             print(record)
 
         if record is not None:
-            if body['firstName'] is not None:
-                record.firstName = body['firstName']
+            if body['First Name'] is not None:
+                record.firstName = body['First Name']
 
-            if body['lastName'] is not None:
-                record.lastName = body['lastName']
+            if body['Last Name'] is not None:
+                record.lastName = body['Last Name']
+
+            if body['Phone Number'] is not None:
+                record.phoneNumber = body['Phone Number']
+
+            if body['Address'] is not None:
+                record.address = body['Address']
+
+            if body['Gender'] is not None:
+                record.gender = body['Gender']
+
+            if body['National Code'] is not None:
+                record.nationalCode = body['National Code']
 
             record.save()
-            return JsonResponse({"status": "succes"})
+            return response({"status": "succes"})
 
         else:
             error_message = {
 
                 "error": "Invalid input number"
             }
-            return JsonResponse(error_message)
+            return response(error_message)
 
 
 
