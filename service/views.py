@@ -39,9 +39,11 @@ class ReserveFood(View):
 class DeleteFood(View):
 
     def delete(self, request, *args, **kwargs):
-        student_no = request.GET.get("studentNo")
-        food = request.GET.get("food")
-        date = request.GET.get("date")
+
+        body = json.loads(request.body)
+        student_no = body['studentNo']
+        food = body['food']
+        date = body['date']
 
         student = Student.objects.get(studentNo=student_no)
         food_id = Food.objects.get(food_name=food)
