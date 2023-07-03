@@ -8,7 +8,6 @@ urlpatterns = [
     path('courseInfo', views.Courses_info.as_view()),
     path('rollcall', views.Rollcall.as_view()),
     path('professorschedule',views.Professor_schedule.as_view()),
-    path('professorschedule',views.Professor_schedule.as_view()),
     path('personInfo', views.PersonInfo.as_view())
 ]
 

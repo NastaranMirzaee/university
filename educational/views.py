@@ -19,6 +19,8 @@ def serialize_data(datas):
 def response(message):
     return HttpResponse(json.dumps(message), content_type="application/json")
 
+#def error_message()
+
 
 class Report_card(View):
 
@@ -123,15 +125,44 @@ class Professor_schedule(View):
         return HttpResponse(json.dumps(result_dictionary), content_type="application/json")
 
 
-
-
 class PersonInfo(View):
     def put(self, request, *args, **kwargs):
         body = json.loads(request.body)
-        student_no = body['student_no']
-        record = Student.objects.get(studentNo=student_no)
-        record.firstName = body['firstName']
-        record.save()
-        return response({"status": "succes"})
+        personId = body['id']
+        record = None
+        if Student.objects.filter(studentNo=personId).exists():
+            record = Student.objects.get(studentNo=personId)
+            print(record)
+
+        elif Professor.objects.filter(personnelCode=personId).exists():
+            record = Professor.objects.get(personnelCode=personId)
+            print(record)
+
+        if record is not None:
+            if body['firstName'] is not None:
+                record.firstName = body['firstName']
+
+            if body['lastName'] is not None:
+                record.lastName = body['lastName']
+
+            record.save()
+            return JsonResponse({"status": "succes"})
+
+        else:
+            error_message = {
+
+                "error": "Invalid input number"
+            }
+            return JsonResponse(error_message)
+
+
+
+
+        # if  body[''] is not None:
+        # student_no = body['student_no']
+        # record = Student.objects.get(studentNo=student_no)
+        # record.firstName = body['firstName']
+        # record.save()
+        # return response({"status": "succes"})
 
 
