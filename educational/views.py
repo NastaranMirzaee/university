@@ -100,3 +100,4 @@ def session_topic(request):
     }
 
     return HttpResponse(json.dumps(re), content_type="application/json")
+

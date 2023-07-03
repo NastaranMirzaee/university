@@ -7,8 +7,6 @@ from django.core import serializers
 from .models import *
 from django.http import HttpResponse, JsonResponse
 
-from .models import *
-
 # Create your views here.
 def leisure_classes(request):
     leisureclasses = LeisureClass.objects\
@@ -43,34 +41,40 @@ class Reservebook(View):
         title = body['title']
         r_from = body['r_from']
         r_to = body['r_to']
+        studentNo= body['studentNo']
 
-        research = Research.objects.get(research_id=research_id,title=title)
-        student = Student.objects.get(studentNo=studentNo)
-        new_book_reservation = ResearchReservation(
+        if Research.objects.filter(research_id=research_id, title=title).exists():
+            research = Research.objects.get(research_id=research_id,title=title)
+            student = Student.objects.get(studentNo=studentNo)
+            new_book_reservation = ResearchReservation(
+                                                    r_from = r_from ,
+                                                    r_to = r_to,
+                                                    research = research,
+                                                    studentNo = student
+                                                   )
+            new_book_reservation.save()
 
-                                                r_from = r_from ,
-                                                r_to = r_to,
-                                                research = research,
-                                                studentNo = student
-                                               )
-        new_book_reservation.save()
+            book_reservations = ResearchReservation.objects\
+                .values('research__title', 'research','r_from', 'r_to', 'studentNo__studentNo')
+            result = []
+            for x in book_reservations:
+                title = x['research__title']
+                book_id = x['research']
+                date_from = str(x['r_from'])
+                date_to = str(x['r_to'])
+                studentNo = x['studentNo__studentNo']
+                result.append({'research__title': title, 'research': book_id,
+                               'r_from': date_from,'r_to': date_to,'studentNo' : studentNo})
 
-        book_reservations = ResearchReservation.objects.values('research__title', 'research__research_id',
-                                                           'r_from ', 'r_to','studentNo__studentNo')
-        result = []
-        for x in book_reservations:
-            title = x['research__title']
-            book_id = x['research__research_id']
-            date_from = str(x['r_from'])
-            date_to = str(x['r_to'])
-            studentN0 = x['studentNo__studentNo']
-            result.append({'research__title': title, 'research__research_id': book_id,
-                           'r_from': date_from,'r_to': date_to,'studentNo__studentNo' : studentN0})
+            re = {
+                "data": result
+            }
+            return HttpResponse(json.dumps(re), content_type="application/json")
 
-        re = {
-            "data": result
-        }
-        return HttpResponse(json.dumps(re), content_type="application/json")
+        else:
+
+            return HttpResponse('Research not found', status=404)
+
 
 
 
